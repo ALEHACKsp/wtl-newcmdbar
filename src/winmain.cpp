@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "resource.h"
+#include "mainframe.h"
 
 CAppModule _Module;
 
@@ -19,5 +20,15 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR pCmdLine, int nCmdSho
     INIT_OR_EXIT(_Module.Init(nullptr, hInstance) == S_OK);
     SCOPE_EXIT{ _Module.Term(); };
     
-    return 0;
+    CMessageLoop msgLoop;
+    INIT_OR_EXIT(_Module.AddMessageLoop(&msgLoop));
+    SCOPE_EXIT{ _Module.RemoveMessageLoop(); };
+
+    CMainFrame wnd;
+    INIT_OR_EXIT(wnd.Create());
+
+    wnd.ToCWindow().ShowWindow(nCmdShow);
+    wnd.ToCWindow().UpdateWindow();
+
+    return msgLoop.Run();
 }
