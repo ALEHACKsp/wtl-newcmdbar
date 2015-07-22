@@ -17,6 +17,10 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR pCmdLine, int nCmdSho
 
     INIT_OR_EXIT(AtlInitCommonControls(ICC_WIN95_CLASSES | ICC_COOL_CLASSES));
 
+    HMODULE hRichEdit;
+    INIT_OR_EXIT(hRichEdit = ::LoadLibraryW(CRichEditCtrl::GetLibraryName()));
+    SCOPE_EXIT{ ::FreeLibrary(hRichEdit); };
+
     INIT_OR_EXIT(_Module.Init(nullptr, hInstance) == S_OK);
     SCOPE_EXIT{ _Module.Term(); };
     

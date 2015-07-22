@@ -11,6 +11,7 @@
 #define WINVER          0x0600
 #define _WIN32_WINNT    0x0600
 #define _WINNT_IE       0x0700
+#define _RICHEDIT_VER   0x0200
 #define _WTL_NO_CSTRING
 #define _WTL_NO_WTYPES
 #define _WTL_CMDBAR_VISTA_STD_MENUBAR

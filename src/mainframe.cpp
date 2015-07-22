@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "resource.h"
 #include "mainframe.h"
+#include "coolmenubar.h"
 
 class CMainFrame::Impl : 
     public CFrameWindowImpl<CMainFrame::Impl>,
@@ -9,8 +10,9 @@ class CMainFrame::Impl :
 {
 private:
     CCommandBarCtrl m_cmdBarCtrl;
-    CToolBarCtrl m_toolbarCtrl;
-
+    CCoolMenuBar    m_coolMenuBarCtrl;
+    CToolBarCtrl    m_toolbarCtrl;
+    
 public:
     DECLARE_FRAME_WND_CLASS(L"FocuslessCommandBarApp:MainFrame", IDR_MAINFRAME);
 
@@ -43,11 +45,14 @@ private:
         m_cmdBarCtrl.LoadImages(IDR_MAINFRAME);
         SetMenu(nullptr);
 
+        m_coolMenuBarCtrl.Create(m_hWnd, rcDefault, nullptr, ATL_SIMPLE_CMDBAR_PANE_STYLE);
+
         m_toolbarCtrl = CreateSimpleToolBarCtrl(
             m_hWnd, IDR_MAINFRAME, FALSE, ATL_SIMPLE_TOOLBAR_PANE_STYLE);
 
         CreateSimpleReBar();
         AddSimpleReBarBand(m_cmdBarCtrl);
+        AddSimpleReBarBand(m_coolMenuBarCtrl, nullptr, TRUE);
         AddSimpleReBarBand(m_toolbarCtrl, nullptr, TRUE);
 
         SizeSimpleReBarBands();

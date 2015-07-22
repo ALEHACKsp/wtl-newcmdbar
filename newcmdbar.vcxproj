@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\coolmenubar.h" />
     <ClInclude Include="src\mainframe.h" />
     <ClInclude Include="src\resource.h" />
     <ClInclude Include="src\scopeexit.h" />
