@@ -37,6 +37,12 @@
   <ItemGroup>
     <ResourceCompile Include="src\newcmdbar.rc" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="res\toolbar.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="src\app.manifest" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1B1F68D0-0699-4669-8DBF-B461355F3AEF}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>

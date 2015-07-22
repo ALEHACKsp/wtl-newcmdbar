@@ -13,10 +13,10 @@
 #define _WINNT_IE       0x0700
 #define _WTL_NO_CSTRING
 #define _WTL_NO_WTYPES
+#define _WTL_CMDBAR_VISTA_STD_MENUBAR
 #include <atlbase.h>
 #include <atlstr.h>
 #include <atltypes.h>
-
 #include <atlapp.h>
 extern CAppModule _Module;  // The instance is defined in winmain.cpp.
 #include <atlwin.h>
