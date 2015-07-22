@@ -296,14 +296,14 @@ public:
 #endif // _WTL_CMDBAR_VISTA_MENUS
 
 // Constructor/destructor
-	CCommandBarCtrlImpl() : 
-			m_hMenu(NULL), 
-			m_hImageList(NULL), 
-			m_wndParent(this, 1), 
-			m_bMenuActive(false), 
-			m_bAttachedMenu(false), 
-			m_nPopBtn(-1), 
-			m_nNextPopBtn(-1), 
+	CCommandBarCtrlImpl() :
+			m_hMenu(NULL),
+			m_hImageList(NULL),
+			m_wndParent(this, 1),
+			m_bMenuActive(false),
+			m_bAttachedMenu(false),
+			m_nPopBtn(-1),
+			m_nNextPopBtn(-1),
 			m_bPopupItem(false),
 			m_bImagesVisible(true),
 			m_bSkipMsg(false),
@@ -1524,7 +1524,7 @@ public:
 				bHandled = TRUE;
 				lRet = MAKELRESULT(wMnem, nRetCode);
 			}
-		} 
+		}
 		else if(!m_bMenuActive)
 		{
 			int nBtn = 0;
@@ -1720,9 +1720,9 @@ public:
 	LRESULT OnParentSysCommand(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
 	{
 		bHandled = FALSE;
-		if((m_uSysKey == VK_MENU 
+		if((m_uSysKey == VK_MENU
 			|| (m_uSysKey == VK_F10 && !(::GetKeyState(VK_SHIFT) & 0x80))
-			|| m_uSysKey == VK_SPACE) 
+			|| m_uSysKey == VK_SPACE)
 			&& wParam == SC_KEYMENU)
 		{
 			T* pT = static_cast<T*>(this);
@@ -1831,7 +1831,7 @@ public:
 						const int COLOR_MENUHILIGHT = 29;
 #endif // !COLOR_MENUHILIGHT
 						bool bDisabled = ((lpTBCustomDraw->nmcd.uItemState & CDIS_DISABLED) == CDIS_DISABLED);
-						if(!bDisabled && ((lpTBCustomDraw->nmcd.uItemState & CDIS_HOT) == CDIS_HOT || 
+						if(!bDisabled && ((lpTBCustomDraw->nmcd.uItemState & CDIS_HOT) == CDIS_HOT ||
 							(lpTBCustomDraw->nmcd.uItemState & CDIS_SELECTED) == CDIS_SELECTED))
 						{
 							::FillRect(lpTBCustomDraw->nmcd.hdc, &lpTBCustomDraw->nmcd.rc, ::GetSysColorBrush(COLOR_MENUHILIGHT));
@@ -2449,8 +2449,8 @@ public:
 		}
 		else
 		{
-			size.cx = ::GetSystemMetrics(SM_CXMENUCHECK); 
-			size.cy = ::GetSystemMetrics(SM_CYMENUCHECK); 
+			size.cx = ::GetSystemMetrics(SM_CXMENUCHECK);
+			size.cy = ::GetSystemMetrics(SM_CYMENUCHECK);
 			bmp.CreateCompatibleBitmap(dc, size.cx, size.cy);
 			ATLASSERT(bmp.m_hBitmap != NULL);
 		}
@@ -2506,7 +2506,7 @@ public:
 		int cy = rcDest.bottom - rcDest.top;
 		if(hBmpCheck != NULL)
 		{
-			// build mask based on transparent color	
+			// build mask based on transparent color
 			dcSource.SetBkColor(m_clrMask);
 			dcMask.SetBkColor(clrBlack);
 			dcMask.SetTextColor(clrWhite);
@@ -2960,7 +2960,7 @@ public:
 		bool bRet = false;
 		for(int i = 0; i < nCount; i++)
 		{
-			REBARBANDINFO rbbi = { RunTimeHelper::SizeOf_REBARBANDINFO(), RBBIM_CHILD | RBBIM_STYLE };
+			REBARBANDINFO rbbi = { (UINT)RunTimeHelper::SizeOf_REBARBANDINFO(), RBBIM_CHILD | RBBIM_STYLE };
 			BOOL bRetBandInfo = (BOOL)::SendMessage(hWndReBar, RB_GETBANDINFO, i, (LPARAM)&rbbi);
 			if(bRetBandInfo && rbbi.hwndChild == m_hWnd)
 			{
@@ -2980,7 +2980,7 @@ public:
 	void GetSystemSettings()
 	{
 		// refresh our font
-		NONCLIENTMETRICS info = { RunTimeHelper::SizeOf_NONCLIENTMETRICS() };
+		NONCLIENTMETRICS info = { (UINT)RunTimeHelper::SizeOf_NONCLIENTMETRICS() };
 		BOOL bRet = ::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(info), &info, 0);
 		ATLASSERT(bRet);
 		if(bRet)
@@ -3339,12 +3339,12 @@ public:
 #endif // !_WTL_NO_AUTO_THEME
 
 // Constructor/destructor
-	CMDICommandBarCtrlImpl() : 
-			m_wndMDIClient(this, 2), m_bChildMaximized(false), 
-			m_hWndChildMaximized(NULL), m_hIconChildMaximized(NULL), 
+	CMDICommandBarCtrlImpl() :
+			m_wndMDIClient(this, 2), m_bChildMaximized(false),
+			m_hWndChildMaximized(NULL), m_hIconChildMaximized(NULL),
 			m_nBtnPressed(-1), m_nBtnWasPressed(-1),
 #ifndef _WTL_NO_AUTO_THEME
-			m_hThemeDLL(NULL), m_hTheme(NULL), m_pfnDrawThemeBackground(NULL), m_pfnDrawThemeParentBackground(NULL), 
+			m_hThemeDLL(NULL), m_hTheme(NULL), m_pfnDrawThemeBackground(NULL), m_pfnDrawThemeParentBackground(NULL),
 #endif // !_WTL_NO_AUTO_THEME
 			m_cxyOffset(2),
 			m_cxIconWidth(16), m_cyIconHeight(16),
@@ -3638,7 +3638,7 @@ public:
 			const UINT TPM_VERPOSANIMATION = 0x1000L;   // Menu animation flag
 #endif
 			CMenuHandle menu = ::GetSystemMenu(m_hWndChildMaximized, FALSE);
-			UINT uRet = (UINT)menu.TrackPopupMenu(TPM_LEFTBUTTON | TPM_VERTICAL | TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RETURNCMD |  
+			UINT uRet = (UINT)menu.TrackPopupMenu(TPM_LEFTBUTTON | TPM_VERTICAL | TPM_LEFTALIGN | TPM_TOPALIGN | TPM_RETURNCMD |
 				(s_bW2K ? TPM_VERPOSANIMATION : 0), m_bLayoutRTL ? rect.right : rect.left, rect.bottom, m_hWndChildMaximized);
 
 			// eat next message if click is on the same button
@@ -3874,7 +3874,7 @@ public:
 		int nCount = (int)::SendMessage(GetParent(), RB_GETBANDCOUNT, 0, 0L);
 		for(int i = 0; i < nCount; i++)
 		{
-			REBARBANDINFO rbi = { RunTimeHelper::SizeOf_REBARBANDINFO(), RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_IDEALSIZE };
+			REBARBANDINFO rbi = { (UINT)RunTimeHelper::SizeOf_REBARBANDINFO(), RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_IDEALSIZE };
 			::SendMessage(GetParent(), RB_GETBANDINFO, i, (LPARAM)&rbi);
 			if(rbi.hwndChild == m_hWnd)
 			{
@@ -3945,7 +3945,7 @@ public:
 			for(int i = 0; i < nCount; i++)
 			{
 #if (_WIN32_IE >= 0x0500)
-				REBARBANDINFO rbi = { RunTimeHelper::SizeOf_REBARBANDINFO(), RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_IDEALSIZE | RBBIM_STYLE };
+				REBARBANDINFO rbi = { (UINT)RunTimeHelper::SizeOf_REBARBANDINFO(), RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_IDEALSIZE | RBBIM_STYLE };
 				::SendMessage(GetParent(), RB_GETBANDINFO, i, (LPARAM)&rbi);
 				if(rbi.hwndChild == m_hWnd)
 				{
@@ -3959,7 +3959,7 @@ public:
 					break;
 				}
 #elif (_WIN32_IE >= 0x0400)
-				REBARBANDINFO rbi = { RunTimeHelper::SizeOf_REBARBANDINFO(), RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_IDEALSIZE };
+				REBARBANDINFO rbi = { (UINT)RunTimeHelper::SizeOf_REBARBANDINFO(), RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_IDEALSIZE };
 				::SendMessage(GetParent(), RB_GETBANDINFO, i, (LPARAM)&rbi);
 				if(rbi.hwndChild == m_hWnd)
 				{
@@ -3970,7 +3970,7 @@ public:
 					break;
 				}
 #else // (_WIN32_IE < 0x0400)
-				REBARBANDINFO rbi = { RunTimeHelper::SizeOf_REBARBANDINFO(), RBBIM_CHILD | RBBIM_CHILDSIZE };
+				REBARBANDINFO rbi = { (UINT)RunTimeHelper::SizeOf_REBARBANDINFO(), RBBIM_CHILD | RBBIM_CHILDSIZE };
 				::SendMessage(GetParent(), RB_GETBANDINFO, i, (LPARAM)&rbi);
 				if(rbi.hwndChild == m_hWnd)
 				{
@@ -4005,7 +4005,7 @@ public:
 #endif
 		_baseClass::GetSystemSettings();
 
-		NONCLIENTMETRICS info = { RunTimeHelper::SizeOf_NONCLIENTMETRICS() };
+		NONCLIENTMETRICS info = { (UINT)RunTimeHelper::SizeOf_NONCLIENTMETRICS() };
 		BOOL bRet = ::SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(info), &info, 0);
 		ATLASSERT(bRet);
 		if(bRet)
