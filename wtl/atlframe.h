@@ -129,11 +129,11 @@ public:
 				{
 					if(m_uCommonResourceID != 0)   // use it if not zero
 					{
-						m_wc.hIcon = (HICON)::LoadImage(ModuleHelper::GetResourceInstance(), 
-							MAKEINTRESOURCE(m_uCommonResourceID), IMAGE_ICON, 
+						m_wc.hIcon = (HICON)::LoadImage(ModuleHelper::GetResourceInstance(),
+							MAKEINTRESOURCE(m_uCommonResourceID), IMAGE_ICON,
 							::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON), LR_DEFAULTCOLOR);
-						m_wc.hIconSm = (HICON)::LoadImage(ModuleHelper::GetResourceInstance(), 
-							MAKEINTRESOURCE(m_uCommonResourceID), IMAGE_ICON, 
+						m_wc.hIconSm = (HICON)::LoadImage(ModuleHelper::GetResourceInstance(),
+							MAKEINTRESOURCE(m_uCommonResourceID), IMAGE_ICON,
 							::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON), LR_DEFAULTCOLOR);
 					}
 					m_atom = ::RegisterClassEx(&m_wc);
@@ -213,8 +213,8 @@ public:
 				if (m_atom == 0)
 				{
 					if(m_uCommonResourceID != 0)   // use it if not zero
-						m_wc.hIcon = (HICON)::LoadImage(ModuleHelper::GetResourceInstance(), 
-							MAKEINTRESOURCE(m_uCommonResourceID), IMAGE_ICON, 
+						m_wc.hIcon = (HICON)::LoadImage(ModuleHelper::GetResourceInstance(),
+							MAKEINTRESOURCE(m_uCommonResourceID), IMAGE_ICON,
 							::GetSystemMetrics(SM_CXICON), ::GetSystemMetrics(SM_CYICON), LR_DEFAULTCOLOR);
 					m_atom = ::RegisterClass(&m_wc);
 				}
@@ -398,10 +398,10 @@ public:
 	HACCEL m_hAccel;
 
 // Constructor
-	CFrameWindowImplBase() : 
-		m_hWndToolBar(NULL), 
-		m_hWndStatusBar(NULL), 
-		m_hWndClient(NULL), 
+	CFrameWindowImplBase() :
+		m_hWndToolBar(NULL),
+		m_hWndStatusBar(NULL),
+		m_hWndClient(NULL),
 #ifdef _WIN32_WCE
 		m_hWndCECommandBar(NULL),
 #endif // _WIN32_WCE
@@ -443,7 +443,7 @@ public:
 		return hWnd;
 	}
 
-	static HWND CreateSimpleToolBarCtrl(HWND hWndParent, UINT nResourceID, BOOL bInitialSeparator = FALSE, 
+	static HWND CreateSimpleToolBarCtrl(HWND hWndParent, UINT nResourceID, BOOL bInitialSeparator = FALSE,
 			DWORD dwStyle = ATL_SIMPLE_TOOLBAR_STYLE, UINT nID = ATL_IDW_TOOLBAR)
 	{
 		HINSTANCE hInst = ModuleHelper::GetResourceInstance();
@@ -612,7 +612,7 @@ public:
 		int nBtnCount = (int)::SendMessage(hWndBand, TB_BUTTONCOUNT, 0, 0L);
 
 		// Set band info structure
-		REBARBANDINFO rbBand = { RunTimeHelper::SizeOf_REBARBANDINFO() };
+		REBARBANDINFO rbBand = { (UINT)RunTimeHelper::SizeOf_REBARBANDINFO() };
 #if (_WIN32_IE >= 0x0400)
 		rbBand.fMask = RBBIM_CHILD | RBBIM_CHILDSIZE | RBBIM_STYLE | RBBIM_ID | RBBIM_SIZE | RBBIM_IDEALSIZE;
 #else
@@ -703,7 +703,7 @@ public:
 
 		for(int i = 0; i < nCount; i++)
 		{
-			REBARBANDINFO rbBand = { RunTimeHelper::SizeOf_REBARBANDINFO() };
+			REBARBANDINFO rbBand = { (UINT)RunTimeHelper::SizeOf_REBARBANDINFO() };
 			rbBand.fMask = RBBIM_SIZE;
 			BOOL bRet = (BOOL)::SendMessage(m_hWndToolBar, RB_GETBANDINFO, i, (LPARAM)&rbBand);
 			ATLASSERT(bRet);
@@ -993,7 +993,7 @@ public:
 	bool PrepareChevronMenu(_ChevronMenuInfo& cmi)
 	{
 		// get rebar and toolbar
-		REBARBANDINFO rbbi = { RunTimeHelper::SizeOf_REBARBANDINFO() };
+		REBARBANDINFO rbbi = { (UINT)RunTimeHelper::SizeOf_REBARBANDINFO() };
 		rbbi.fMask = RBBIM_CHILD;
 		BOOL bRet = (BOOL)::SendMessage(cmi.lpnm->hdr.hwndFrom, RB_GETBANDINFO, cmi.lpnm->uBand, (LPARAM)&rbbi);
 		ATLASSERT(bRet);
@@ -1277,7 +1277,7 @@ public:
 
 #ifndef _WIN32_WCE
 
-inline HWND AtlCreateSimpleToolBar(HWND hWndParent, UINT nResourceID, BOOL bInitialSeparator = FALSE, 
+inline HWND AtlCreateSimpleToolBar(HWND hWndParent, UINT nResourceID, BOOL bInitialSeparator = FALSE,
 		DWORD dwStyle = ATL_SIMPLE_TOOLBAR_STYLE, UINT nID = ATL_IDW_TOOLBAR)
 {
 	return CFrameWindowImplBase<>::CreateSimpleToolBarCtrl(hWndParent, nResourceID, bInitialSeparator, dwStyle, nID);
@@ -2517,7 +2517,7 @@ public:
 		for( ; pMap->m_nID != (WORD)-1; pMap++, pUIData++)
 		{
 			if(nID == (int)pMap->m_nID)
-			{		
+			{
 				pUIData->m_wState = (WORD)(dwState | pMap->m_wType);
 				m_wDirtyType |= pMap->m_wType;
 				break;   // found
@@ -3011,7 +3011,7 @@ public:
 			if(m_arrUIMap[i].m_nID == nID) // matching UI map element
 			{
 				WORD wType = m_arrUIMap[i].m_wType & ~t_wType;
-				if (wType != 0)   // has other types 
+				if (wType != 0)   // has other types
 				{
 					m_arrUIMap[i].m_wType = wType; // keep other types
 					return true;
@@ -3118,8 +3118,8 @@ public:
 		{
 			for(int e = 0; e < m_UIElements.GetSize(); e++)
 			{
-				if((m_UIElements[e].m_wType == UPDUI_STATUSBAR) && 
-				   (m_arrUIMap[i].m_wType & UPDUI_STATUSBAR) && 
+				if((m_UIElements[e].m_wType == UPDUI_STATUSBAR) &&
+				   (m_arrUIMap[i].m_wType & UPDUI_STATUSBAR) &&
 				   (m_arrUIData[i].m_wState & UPDUI_STATUSBAR))
 				{
 					UIUpdateStatusBarElement(m_arrUIMap[i].m_nID, &m_arrUIData[i], m_UIElements[e].m_hWnd);
@@ -3497,7 +3497,7 @@ public:
 #endif // _WIN32_WCE
 
 // Implementation
-	bool DlgResize_PositionControl(int cxWidth, int cyHeight, RECT& rectGroup, _AtlDlgResizeData& data, bool bGroup, 
+	bool DlgResize_PositionControl(int cxWidth, int cyHeight, RECT& rectGroup, _AtlDlgResizeData& data, bool bGroup,
 	                               _AtlDlgResizeData* pDataPrev = NULL)
 	{
 		T* pT = static_cast<T*>(this);
