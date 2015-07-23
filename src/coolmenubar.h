@@ -64,10 +64,13 @@ public:
     // Data members
 
     HMENU m_hMenu;
+    ATL::CContainedWindow m_wndParent;
 
     // Constructor/destructor
 
-    CCoolMenuBarImpl() : m_hMenu(NULL)
+    CCoolMenuBarImpl() :
+        m_hMenu(NULL),
+        m_wndParent(this, 1)
     {
     }
 
@@ -193,6 +196,10 @@ public:
 
     BEGIN_MSG_MAP(CCoolMenuBarImpl)
         MESSAGE_HANDLER(WM_CREATE, OnCreate)
+        MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
+        MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBackground)
+    ALT_MSG_MAP(1)   // Parent window messages
+        NOTIFY_CODE_HANDLER(NM_CUSTOMDRAW, OnParentCustomDraw)
     END_MSG_MAP()
 
     LRESULT OnCreate(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
@@ -201,10 +208,44 @@ public:
 
         LRESULT lRet = DefWindowProc(uMsg, wParam, lParam);
 
+        // Intercept the parent window's messages.
+
+        ATL::CWindow wndParent = GetParent();
+        ATL::CWindow wndTopLevelParent = wndParent.GetTopLevelParent();
+        m_wndParent.SubclassWindow(wndTopLevelParent);
+
         // Initialize the toolbar.
 
         SetButtonStructSize();
         SetImageList(NULL);
+
+        return lRet;
+    }
+
+    LRESULT OnDestroy(UINT uMsg, WPARAM wParam, LPARAM lParam, BOOL& /*bHandled*/)
+    {
+        LRESULT lRet = DefWindowProc(uMsg, wParam, lParam);
+
+        // Stop intercepting the parent window's messages.
+
+        if(m_wndParent.IsWindow())
+            m_wndParent.UnsubclassWindow();
+
+        return lRet;
+    }
+
+    LRESULT OnEraseBackground(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
+    {
+        // Always transparent for now.
+
+        bHandled = FALSE;
+        return 0;
+    }
+
+    LRESULT OnParentCustomDraw(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& bHandled)
+    {
+        LRESULT lRet = CDRF_DODEFAULT;
+        bHandled = FALSE;
 
         return lRet;
     }
