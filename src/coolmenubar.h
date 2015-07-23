@@ -270,9 +270,36 @@ public:
         LPNMTOOLBAR pNMToolBar = (LPNMTOOLBAR)pnmh;
         int nIndex = CommandToIndex(pNMToolBar->iItem);
 
-        //m_bContextMenu = false;
-        //m_bEscapePressed = false;
-        //pT->DoPopupMenu(nIndex, true);
+        // get popup menu and it's position
+        RECT rect = { 0 };
+        GetItemRect(nIndex, &rect);
+
+        POINT pt = { rect.left, rect.bottom };
+        MapWindowPoints(NULL, &pt, 1);
+        MapWindowPoints(NULL, &rect);
+
+        TPMPARAMS TPMParams = { 0 };
+        TPMParams.cbSize    = sizeof(TPMPARAMS);
+        TPMParams.rcExclude = rect;
+
+        HMENU hMenuPopup = ::GetSubMenu(m_hMenu, nIndex);
+        ATLASSERT(hMenuPopup != NULL);
+
+        // get button ID
+
+        TBBUTTON tbb = { 0 };
+        GetButton(nIndex, &tbb);
+
+        const int nCmdID = tbb.idCommand;
+
+        PressButton(nCmdID, TRUE);
+        SetHotItem(nCmdID);
+
+        ::TrackPopupMenuEx(hMenuPopup,
+            TPM_LEFTBUTTON | TPM_VERTICAL | TPM_LEFTALIGN | TPM_TOPALIGN | TPM_VERPOSANIMATION,
+            pt.x, pt.y, m_hWnd, &TPMParams);
+
+        PressButton(nCmdID, FALSE);
 
         return TBDDRET_DEFAULT;
     }
