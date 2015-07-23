@@ -314,8 +314,6 @@ public:
 
         ATLASSERT(pData->wVersion == 1);
 
-        WORD* pItems = &pData->aItems[0];
-        int nItems = pData->wItemCount;
 
         // Set internal data.
 
@@ -347,9 +345,9 @@ public:
         else
         {
             if (m_bAlphaImages)
-                bmp = (HBITMAP)::LoadImage(ModuleHelper::GetResourceInstance(), image.m_lpstr, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_DEFAULTSIZE);
+                bmp.LoadImage(image);
             else
-                bmp.LoadBitmap(image.m_lpstr);
+                bmp.LoadBitmap(image);
         }
 
         ATLASSERT(bmp.m_hBitmap != NULL);
@@ -361,10 +359,10 @@ public:
 
         // Fill the array with command IDs.
 
-        for (int i = 0; i < nItems; i++)
+        for (int i = 0; i < pData->wItemCount; ++i)
         {
-            if (pItems[i] != 0)
-                m_arrCommand.Add(pItems[i]);
+            if (pData->aItems[i] != 0)
+                m_arrCommand.Add(pData->aItems[i]);
         }
 
         int nImageCount = ::ImageList_GetImageCount(m_hImageList);
