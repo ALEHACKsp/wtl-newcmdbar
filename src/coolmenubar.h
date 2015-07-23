@@ -345,7 +345,7 @@ public:
         else
         {
             if (m_bAlphaImages)
-                bmp.LoadImage(image);
+                bmp = AtlLoadBitmapImage(image, LR_CREATEDIBSECTION | LR_DEFAULTSIZE);
             else
                 bmp.LoadBitmap(image);
         }

@@ -754,22 +754,6 @@ public:
 	}
 #endif // !_WIN32_WCE
 
-#ifndef _WIN32_WCE
-    HBITMAP LoadImage(ATL::_U_STRINGorID image, UINT fuFlags = LR_CREATEDIBSECTION | LR_DEFAULTSIZE)
-    {
-        ATLASSERT(m_hBitmap == NULL);
-        m_hBitmap = (HBITMAP)::LoadImage(ModuleHelper::GetResourceInstance(), image.m_lpstr, IMAGE_BITMAP, 0, 0, fuFlags);
-        return m_hBitmap;
-    }
-#else
-    HBITMAP LoadImage(ATL::_U_STRINGorID image)
-    {
-        ATLASSERT(m_hBitmap == NULL);
-        m_hBitmap = (HBITMAP)::LoadImage(ModuleHelper::GetResourceInstance(), image.m_lpstr, IMAGE_BITMAP, 0, 0, 0);
-        return m_hBitmap;
-    }
-#endif // !_WIN32_WCE
-
 	HBITMAP CreateBitmap(int nWidth, int nHeight, UINT nPlanes, UINT nBitsPerPixel, const void* lpBits)
 	{
 		ATLASSERT(m_hBitmap == NULL);
