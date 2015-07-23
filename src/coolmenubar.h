@@ -66,8 +66,9 @@ public:
     HMENU m_hMenu;
     ATL::CContainedWindow m_wndParent;
 
-    bool m_bParentActive : 1;
-    bool m_bShowKeyboardCues : 1;
+    bool m_bParentActive        : 1;
+    bool m_bShowKeyboardCues    : 1;
+
     // Constructor/destructor
 
     CCoolMenuBarImpl() :
@@ -204,6 +205,7 @@ public:
         MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBackground)
     ALT_MSG_MAP(1)   // Parent window messages
         MESSAGE_HANDLER(WM_ACTIVATE, OnParentActivate)
+        NOTIFY_CODE_HANDLER(TBN_DROPDOWN, OnParentDropDown)
         NOTIFY_CODE_HANDLER(NM_CUSTOMDRAW, OnParentCustomDraw)
     END_MSG_MAP()
 
@@ -255,6 +257,25 @@ public:
         return 1;
     }
 
+    LRESULT OnParentDropDown(int /*idCtrl*/, LPNMHDR pnmh, BOOL& bHandled)
+    {
+        // Check if this comes from us.
+
+        if (pnmh->hwndFrom != m_hWnd)
+        {
+            bHandled = FALSE;
+            return TBDDRET_NODEFAULT;
+        }
+
+        LPNMTOOLBAR pNMToolBar = (LPNMTOOLBAR)pnmh;
+        int nIndex = CommandToIndex(pNMToolBar->iItem);
+
+        //m_bContextMenu = false;
+        //m_bEscapePressed = false;
+        //pT->DoPopupMenu(nIndex, true);
+
+        return TBDDRET_DEFAULT;
+    }
 
     LRESULT OnParentCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& bHandled)
     {
@@ -272,7 +293,7 @@ public:
         }
         else if (lpTBCustomDraw->nmcd.dwDrawStage == CDDS_ITEMPREPAINT)
         {
-            // Prevent only the text from being drawn.
+            // Let the toolbar to draw the button normally, except for the text.
 
             ::SetRectEmpty(&lpTBCustomDraw->rcText);
 
@@ -281,6 +302,8 @@ public:
         }
         else if (lpTBCustomDraw->nmcd.dwDrawStage == CDDS_ITEMPOSTPAINT)
         {
+            // Draw the text at the same position even if the button is pressed down.
+
             if (!m_bParentActive || (lpTBCustomDraw->nmcd.uItemState & CDIS_DISABLED))
                 lpTBCustomDraw->clrText = ::GetSysColor(COLOR_GRAYTEXT);
 
@@ -295,9 +318,8 @@ public:
 
     void _ParentCustomDrawHelper(LPNMTBCUSTOMDRAW lpTBCustomDraw)
     {
-        // Draw the text at the same position even if the button is pressed.
-
         CDCHandle dc = lpTBCustomDraw->nmcd.hdc;
+
         dc.SetTextColor(lpTBCustomDraw->clrText);
         dc.SetBkMode(lpTBCustomDraw->nStringBkMode);
 
@@ -308,6 +330,7 @@ public:
 
         const int cchText = 200;
         TCHAR szText[cchText] = { 0 };
+
         TBBUTTONINFO tbbi = { 0 };
         tbbi.cbSize = sizeof(TBBUTTONINFO);
         tbbi.dwMask = TBIF_TEXT;
@@ -315,7 +338,11 @@ public:
         tbbi.cchText = cchText;
         GetButtonInfo((int)lpTBCustomDraw->nmcd.dwItemSpec, &tbbi);
 
-        dc.DrawText(szText, -1, &lpTBCustomDraw->nmcd.rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER | (m_bShowKeyboardCues ? 0 : DT_HIDEPREFIX));
+        UINT format = DT_SINGLELINE | DT_CENTER | DT_VCENTER;
+        if (!m_bShowKeyboardCues)
+            format |= DT_HIDEPREFIX;
+
+        dc.DrawText(szText, -1, &lpTBCustomDraw->nmcd.rc, format);
 
         if (hFont != NULL)
             dc.SelectFont(hFontOld);
