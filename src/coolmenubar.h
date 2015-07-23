@@ -93,9 +93,9 @@ public:
 
     // Data members
 
-    HMENU m_hMenu;
-    HIMAGELIST m_hImageList;
-    ATL::CSimpleValArray<WORD> m_arrCommand;
+    HMENU                   m_hMenu;
+    HIMAGELIST              m_hImageList;
+    ATL::CSimpleArray<WORD> m_arrCommand;   // Command IDs, corresponds to the image list.
 
     ATL::CContainedWindow m_wndParent;
 
