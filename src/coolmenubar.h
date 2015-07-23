@@ -46,37 +46,80 @@ class ATL_NO_VTABLE CCoolMenuBarImpl : public ATL::CWindowImpl< T, TBase, TWinTr
 public:
     DECLARE_WND_SUPERCLASS(NULL, TBase::GetWndClassName())
 
+    // Declarations
+
+    struct _MenuItemData	// menu item data
+    {
+        DWORD dwMagic;
+        LPTSTR lpstrText;
+        UINT fType;
+        UINT fState;
+        int iButton;
+
+        _MenuItemData() { dwMagic = 0x1313; }
+        bool IsCmdBarMenuItem() { return (dwMagic == 0x1313); }
+    };
+
+    struct _ToolBarData	// toolbar resource data
+    {
+        WORD wVersion;
+        WORD wWidth;
+        WORD wHeight;
+        WORD wItemCount;
+        WORD aItems[1];
+
+        WORD* items()
+        {
+            return &aItems[0];
+        }
+    };
+
     // Constants
 
-    enum _CmdBarDrawConstants
-    {
-        s_kcxGap = 1,
-        s_kcxTextMargin = 2,
-        s_kcxButtonMargin = 3,
-        s_kcyButtonMargin = 3
-    };
+    //enum _CmdBarDrawConstants
+    //{
+    //    s_kcxGap = 1,
+    //    s_kcxTextMargin = 2,
+    //    s_kcxButtonMargin = 3,
+    //    s_kcyButtonMargin = 3
+    //};
 
     enum
     {
-        _chChevronShortcut = _T('/')
+        _chChevronShortcut = _T('/'),
+        _nDefaultBitmapWidth  = 16,
+        _nDefaultBitmapHeight = 15,
     };
 
     // Data members
 
     HMENU m_hMenu;
+    HIMAGELIST m_hImageList;
+    ATL::CSimpleValArray<WORD> m_arrCommand;
+
     ATL::CContainedWindow m_wndParent;
 
     bool m_bParentActive        : 1;
     bool m_bShowKeyboardCues    : 1;
+    bool m_bAlphaImages         : 1;
+
+    SIZE m_szBitmap;
+    //SIZE m_szButton;
+
+    COLORREF m_clrMask;
 
     // Constructor/destructor
 
     CCoolMenuBarImpl() :
         m_hMenu(NULL),
+        m_hImageList(NULL),
         m_wndParent(this, 1),
         m_bParentActive(true),
-        m_bShowKeyboardCues(false)
+        m_bShowKeyboardCues(false),
+        m_bAlphaImages(false),
+        m_clrMask(RGB(192, 192, 192))
     {
+        SetImageSize(_nDefaultBitmapWidth, _nDefaultBitmapHeight);
     }
 
     ~CCoolMenuBarImpl()
@@ -91,6 +134,54 @@ public:
     {
         ATLASSERT(::IsWindow(m_hWnd));
         return m_hMenu;
+    }
+
+    COLORREF GetImageMaskColor() const
+    {
+        return m_clrMask;
+    }
+
+    COLORREF SetImageMaskColor(COLORREF clrMask)
+    {
+        COLORREF clrOld = m_clrMask;
+        m_clrMask = clrMask;
+        return clrOld;
+    }
+
+    void GetImageSize(SIZE& size) const
+    {
+        size = m_szBitmap;
+    }
+
+    bool SetImageSize(SIZE& size)
+    {
+        return SetImageSize(size.cx, size.cy);
+    }
+
+    bool SetImageSize(int cx, int cy)
+    {
+        if (m_hImageList != NULL)
+        {
+            if (::ImageList_GetImageCount(m_hImageList) == 0)   // empty
+            {
+                ::ImageList_Destroy(m_hImageList);
+                m_hImageList = NULL;
+            }
+            else
+            {
+                return false;   // can't set, image list exists
+            }
+        }
+
+        if (cx == 0 || cy == 0)
+            return false;
+
+        m_szBitmap.cx = cx;
+        m_szBitmap.cy = cy;
+        //m_szButton.cx = m_szBitmap.cx + 2 * s_kcxButtonMargin;
+        //m_szButton.cy = m_szBitmap.cy + 2 * s_kcyButtonMargin;
+
+        return true;
     }
 
     // Methods
@@ -193,6 +284,93 @@ public:
         SetRedraw(TRUE);
         Invalidate();
         UpdateWindow();
+
+        return TRUE;
+    }
+
+    BOOL LoadImages(ATL::_U_STRINGorID image)
+    {
+        return _LoadImagesHelper(image, false);
+    }
+
+    BOOL LoadMappedImages(UINT nIDImage, UINT nFlags = 0, LPCOLORMAP lpColorMap = NULL, int nMapSize = 0)
+    {
+        return _LoadImagesHelper(nIDImage, true, nFlags, lpColorMap, nMapSize);
+    }
+
+    BOOL _LoadImagesHelper(ATL::_U_STRINGorID image, bool bMapped, UINT nFlags = 0, LPCOLORMAP lpColorMap = NULL, int nMapSize = 0)
+    {
+        ATLASSERT(::IsWindow(m_hWnd));
+
+        // Load and parse the toolbar resource.
+
+        CResource src;
+        if (!src.Load(RT_TOOLBAR, image))
+            return FALSE;
+
+        _ToolBarData* pData = (_ToolBarData*)src.Lock();
+        if (pData == NULL)
+            return FALSE;
+
+        ATLASSERT(pData->wVersion == 1);
+
+        WORD* pItems = &pData->aItems[0];
+        int nItems = pData->wItemCount;
+
+        // Set internal data.
+
+        SetImageSize(pData->wWidth, pData->wHeight);
+
+        // Create image list if needed.
+
+        if (m_hImageList == NULL)
+        {
+            // Check if the bitmap is 32-bit (alpha channel) bitmap (valid for Windows XP only)
+            T* pT = static_cast<T*>(this);
+            m_bAlphaImages = AtlIsAlphaBitmapResource(image);
+
+            if (!pT->CreateInternalImageList(pData->wItemCount))
+                return FALSE;
+        }
+
+        CImageList imageList = m_hImageList;
+
+        // Add bitmap to our image list.
+
+        CBitmap bmp;
+        if (bMapped)
+        {
+            ATLASSERT(HIWORD(PtrToUlong(image.m_lpstr)) == 0);   // if mapped, must be a numeric ID
+            int nIDImage = (int)(short)LOWORD(PtrToUlong(image.m_lpstr));
+            bmp.LoadMappedBitmap(nIDImage, (WORD)nFlags, lpColorMap, nMapSize);
+        }
+        else
+        {
+            if (m_bAlphaImages)
+                bmp = (HBITMAP)::LoadImage(ModuleHelper::GetResourceInstance(), image.m_lpstr, IMAGE_BITMAP, 0, 0, LR_CREATEDIBSECTION | LR_DEFAULTSIZE);
+            else
+                bmp.LoadBitmap(image.m_lpstr);
+        }
+
+        ATLASSERT(bmp.m_hBitmap != NULL);
+        if (bmp.m_hBitmap == NULL)
+            return FALSE;
+
+        if (::ImageList_AddMasked(m_hImageList, bmp, m_clrMask) == -1)
+            return FALSE;
+
+        // Fill the array with command IDs.
+
+        for (int i = 0; i < nItems; i++)
+        {
+            if (pItems[i] != 0)
+                m_arrCommand.Add(pItems[i]);
+        }
+
+        int nImageCount = ::ImageList_GetImageCount(m_hImageList);
+        ATLASSERT(nImageCount == m_arrCommand.GetSize());
+        if (nImageCount != m_arrCommand.GetSize())
+            return FALSE;
 
         return TRUE;
     }
@@ -373,6 +551,16 @@ public:
 
         if (hFont != NULL)
             dc.SelectFont(hFontOld);
+    }
+
+    // Implementation
+
+    bool CreateInternalImageList(int cImages)
+    {
+        UINT uFlags = (m_bAlphaImages ? ILC_COLOR32 : ILC_COLOR24) | ILC_MASK;
+        m_hImageList = ::ImageList_Create(m_szBitmap.cx, m_szBitmap.cy, uFlags, cImages, 1);
+        ATLASSERT(m_hImageList != NULL);
+        return (m_hImageList != NULL);
     }
 };
 

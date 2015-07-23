@@ -40,7 +40,7 @@ private:
     {
         m_coolMenuBarCtrl.Create(m_hWnd, rcDefault, nullptr, ATL_SIMPLE_CMDBAR_PANE_STYLE);
         m_coolMenuBarCtrl.AttachMenu(GetMenu());
-        //m_cmdBarCtrl.LoadImages(IDR_MAINFRAME);
+        m_coolMenuBarCtrl.LoadImages(IDR_MAINFRAME);
         SetMenu(nullptr);
 
         m_toolbarCtrl = CreateSimpleToolBarCtrl(
