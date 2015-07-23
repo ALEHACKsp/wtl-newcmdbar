@@ -145,7 +145,8 @@ public:
 
                 // Then, get the menu item info using a sufficient buffer.
 
-                TCHAR *szString = new TCHAR[ mii.cch + 1 ];
+                ATL::CTempBuffer<TCHAR> szString;
+                szString.Allocate(mii.cch + 1);
 
                 mii.fMask      = MIIM_TYPE | MIIM_STATE | MIIM_SUBMENU;
                 mii.fType      = MFT_STRING;
@@ -178,8 +179,6 @@ public:
 
                 bRet = SetButtonInfo(i, &bi);
                 ATLASSERT(bRet);
-
-                delete[] szString;
             }
         }
 
