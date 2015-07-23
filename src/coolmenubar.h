@@ -66,11 +66,15 @@ public:
     HMENU m_hMenu;
     ATL::CContainedWindow m_wndParent;
 
+    bool m_bParentActive : 1;
+    bool m_bShowKeyboardCues : 1;
     // Constructor/destructor
 
     CCoolMenuBarImpl() :
         m_hMenu(NULL),
-        m_wndParent(this, 1)
+        m_wndParent(this, 1),
+        m_bParentActive(true),
+        m_bShowKeyboardCues(false)
     {
     }
 
@@ -199,6 +203,7 @@ public:
         MESSAGE_HANDLER(WM_DESTROY, OnDestroy)
         MESSAGE_HANDLER(WM_ERASEBKGND, OnEraseBackground)
     ALT_MSG_MAP(1)   // Parent window messages
+        MESSAGE_HANDLER(WM_ACTIVATE, OnParentActivate)
         NOTIFY_CODE_HANDLER(NM_CUSTOMDRAW, OnParentCustomDraw)
     END_MSG_MAP()
 
@@ -242,12 +247,78 @@ public:
         return 0;
     }
 
-    LRESULT OnParentCustomDraw(int /*idCtrl*/, LPNMHDR /*pnmh*/, BOOL& bHandled)
+    LRESULT OnParentActivate(UINT /*uMsg*/, WPARAM wParam, LPARAM /*lParam*/, BOOL& bHandled)
+    {
+        m_bParentActive = (LOWORD(wParam) != WA_INACTIVE);
+
+        bHandled = FALSE;
+        return 1;
+    }
+
+
+    LRESULT OnParentCustomDraw(int /*idCtrl*/, LPNMHDR pnmh, BOOL& bHandled)
     {
         LRESULT lRet = CDRF_DODEFAULT;
         bHandled = FALSE;
 
+        if (pnmh->hwndFrom != m_hWnd)
+            return lRet;
+
+        LPNMTBCUSTOMDRAW lpTBCustomDraw = (LPNMTBCUSTOMDRAW)pnmh;
+        if (lpTBCustomDraw->nmcd.dwDrawStage == CDDS_PREPAINT)
+        {
+            lRet = CDRF_NOTIFYITEMDRAW;
+            bHandled = TRUE;
+        }
+        else if (lpTBCustomDraw->nmcd.dwDrawStage == CDDS_ITEMPREPAINT)
+        {
+            // Prevent only the text from being drawn.
+
+            ::SetRectEmpty(&lpTBCustomDraw->rcText);
+
+            lRet = CDRF_NOTIFYPOSTPAINT;
+            bHandled = TRUE;
+        }
+        else if (lpTBCustomDraw->nmcd.dwDrawStage == CDDS_ITEMPOSTPAINT)
+        {
+            if (!m_bParentActive || (lpTBCustomDraw->nmcd.uItemState & CDIS_DISABLED))
+                lpTBCustomDraw->clrText = ::GetSysColor(COLOR_GRAYTEXT);
+
+            _ParentCustomDrawHelper(lpTBCustomDraw);
+
+            lRet = CDRF_SKIPDEFAULT;
+            bHandled = TRUE;
+        }
+
         return lRet;
+    }
+
+    void _ParentCustomDrawHelper(LPNMTBCUSTOMDRAW lpTBCustomDraw)
+    {
+        // Draw the text at the same position even if the button is pressed.
+
+        CDCHandle dc = lpTBCustomDraw->nmcd.hdc;
+        dc.SetTextColor(lpTBCustomDraw->clrText);
+        dc.SetBkMode(lpTBCustomDraw->nStringBkMode);
+
+        HFONT hFont = GetFont();
+        HFONT hFontOld = NULL;
+        if (hFont != NULL)
+            hFontOld = dc.SelectFont(hFont);
+
+        const int cchText = 200;
+        TCHAR szText[cchText] = { 0 };
+        TBBUTTONINFO tbbi = { 0 };
+        tbbi.cbSize = sizeof(TBBUTTONINFO);
+        tbbi.dwMask = TBIF_TEXT;
+        tbbi.pszText = szText;
+        tbbi.cchText = cchText;
+        GetButtonInfo((int)lpTBCustomDraw->nmcd.dwItemSpec, &tbbi);
+
+        dc.DrawText(szText, -1, &lpTBCustomDraw->nmcd.rc, DT_SINGLELINE | DT_CENTER | DT_VCENTER | (m_bShowKeyboardCues ? 0 : DT_HIDEPREFIX));
+
+        if (hFont != NULL)
+            dc.SelectFont(hFontOld);
     }
 };
 
