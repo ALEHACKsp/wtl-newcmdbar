@@ -25,5 +25,6 @@ extern CAppModule _Module;  // The instance is defined in winmain.cpp.
 #include <atlcrack.h>
 #include <atlctrls.h>
 #include <atlctrlw.h>
+#include <atltheme.h>
 
 #include "scopeexit.h"

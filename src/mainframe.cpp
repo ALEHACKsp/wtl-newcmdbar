@@ -9,7 +9,6 @@ class CMainFrame::Impl :
     public CIdleHandler
 {
 private:
-    CCommandBarCtrl m_cmdBarCtrl;
     CCoolMenuBar    m_coolMenuBarCtrl;
     CToolBarCtrl    m_toolbarCtrl;
     
@@ -39,23 +38,17 @@ private:
 
     int OnCreate(LPCREATESTRUCT lpCreateStruct)
     {
-        m_cmdBarCtrl.Create(m_hWnd, rcDefault, nullptr, ATL_SIMPLE_CMDBAR_PANE_STYLE);
-
-        m_cmdBarCtrl.AttachMenu(GetMenu());
-        m_cmdBarCtrl.LoadImages(IDR_MAINFRAME);
-        SetMenu(nullptr);
-
         m_coolMenuBarCtrl.Create(m_hWnd, rcDefault, nullptr, ATL_SIMPLE_CMDBAR_PANE_STYLE);
+        m_coolMenuBarCtrl.AttachMenu(GetMenu());
+        //m_cmdBarCtrl.LoadImages(IDR_MAINFRAME);
+        SetMenu(nullptr);
 
         m_toolbarCtrl = CreateSimpleToolBarCtrl(
             m_hWnd, IDR_MAINFRAME, FALSE, ATL_SIMPLE_TOOLBAR_PANE_STYLE);
 
         CreateSimpleReBar();
-        AddSimpleReBarBand(m_cmdBarCtrl);
-        AddSimpleReBarBand(m_coolMenuBarCtrl, nullptr, TRUE);
+        AddSimpleReBarBand(m_coolMenuBarCtrl);
         AddSimpleReBarBand(m_toolbarCtrl, nullptr, TRUE);
-
-        SizeSimpleReBarBands();
 
         auto loop = _Module.GetMessageLoop();
         loop->AddMessageFilter(this);
