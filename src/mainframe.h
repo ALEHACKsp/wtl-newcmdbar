@@ -11,7 +11,7 @@ public:
     ~CMainFrame();
 
     HWND Create();
-    CWindow ToCWindow() const;
+    ATL::CWindow ToCWindow() const;
 
 private:
     CMainFrame(const CMainFrame &);

@@ -90,5 +90,5 @@ HWND CMainFrame::Create()
 
 ATL::CWindow CMainFrame::ToCWindow() const
 {
-    return CWindow(m_pimpl->m_hWnd);
+    return ATL::CWindow(m_pimpl->m_hWnd);
 }

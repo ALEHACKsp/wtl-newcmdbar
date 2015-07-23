@@ -15,6 +15,7 @@
 #define _WTL_NO_CSTRING
 #define _WTL_NO_WTYPES
 #define _WTL_CMDBAR_VISTA_STD_MENUBAR
+#define _ATL_NO_AUTOMATIC_NAMESPACE
 #include <atlbase.h>
 #include <atlstr.h>
 #include <atltypes.h>
