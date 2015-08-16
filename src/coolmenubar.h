@@ -391,7 +391,8 @@ public:
 
         LRESULT lRet = DefWindowProc(uMsg, wParam, lParam);
 
-        // Intercept the parent window's messages.
+        // Subclass the parent window to receive the notifications to it without
+        // the message/notification reflection.
 
         ATL::CWindow wndParent = GetParent();
         ATL::CWindow wndTopLevelParent = wndParent.GetTopLevelParent();
